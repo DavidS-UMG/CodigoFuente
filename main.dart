@@ -1,72 +1,106 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
-import 'my_charts.dart' as MyCharts;
+import 'package:url_launcher/url_launcher.dart';
+
+import 'covid_chart.dart' as covidchart;
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'UMG - COVID-19',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const MyHomePage(title: 'Historial de casos de COVID-19'),
+      title: 'Demostración',
+      //theme: ThemeData(primarySwatch: Colors.blue),
+      home: MyHomePage(title: 'Proyecto integrador'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
+  MyHomePage({required this.title});
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  void _parseAndlaunch(String str) async {
+    if (!await launchUrl(Uri.parse(str))) throw 'Error desconocido! (${Uri.parse(str)})';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        toolbarHeight: 0,
       ),
       body: Align(
         alignment: Alignment.center,
         child: Padding(
           padding: const EdgeInsets.only(
             top: 15.0,
-            bottom: 60.0,
+            bottom: 15.0,
             left: 5,
             right: 5,
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text(
-                'Casos más recientes',
-              ),
-              Text(
-                '36',
-                style: Theme.of(context).textTheme.headline4,
-              ),
-              SizedBox(
-                height: 15,
+              TextButton(
+                onPressed: () {
+                  _parseAndlaunch('https://github.com/DavidS-UMG');
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(
+                      Icons.code,
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text('Código fuente'),
+                  ],
+                ),
               ),
               Flexible(
-                child: MyCharts.MyChart(),
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: covidchart.MyChart(),
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  IconButton(
+                    onPressed: () => setState(() => covidchart.mexico = !covidchart.mexico),
+                    icon: covidchart.mexico ? Icon(Icons.location_on_outlined): Icon(Icons.location_on),
+                  ),
+                  IconButton(
+                    onPressed: () => setState(() => covidchart.cases = !covidchart.cases),
+                    icon: Icon(
+                      covidchart.cases ? Icons.insert_chart_outlined_rounded : Icons.insert_chart_rounded,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => setState(() => covidchart.zoom = !covidchart.zoom),
+                    icon: Icon(
+                      covidchart.zoom ? Icons.zoom_out : Icons.zoom_in,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => setState(() {}),
-        tooltip: 'Refresh',
-        child: const Icon(Icons.rotate_left_rounded),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterFloat,
     );
   }
 }
